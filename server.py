@@ -32,6 +32,19 @@ class jobsHandler(RequestHandler):
         #self.write('running_jobs:\n' + str(running_jobs) + '\npending_jobs:\n' + str(pending_jobs) +
         #           '\nfinished_jobs:\n' + str(finished_jobs) + 'old_jobs:\n' + str(old_jobids) + '\n')
 
+class StatusHandler(RequestHandler):
+    def get(self,id):
+        running_jobs, pending_jobs, finished_jobs, old_jobids = jm.list_jobs()
+        if id in running_jobs:
+            self.write('running')
+        elif id in pending_jobs:
+            self.write('pending')
+        elif id in finished_jobs:
+            self.write('finished')
+        else:
+            self.write('outdate or error')
+        self.finish()
+
 
 class SubmitHandler(RequestHandler):
     def post(self):
@@ -66,6 +79,7 @@ application = tornado.web.Application([
     (r'/about', aboutHandler),
     (r"/", MainHandler),
     (r'/(.*)', StaticFileHandler, {'path': './page/'}),
+    (r'/status/(.*)',StatusHandler),
 ])
 
 if __name__ == '__main__':
