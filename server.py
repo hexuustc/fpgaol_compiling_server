@@ -70,7 +70,7 @@ class SubmitHandler(RequestHandler):
         #print(id, XdcFileName, SrcFileName1, SrcFileName2, inputFPGA)
         sourcecode = [[XdcFileName, inputXdcFile], [SrcFileName1, inputFile1]]
 
-        if  id and inputFPGA and inputXdcFile and SrcFileName1 and SrcFileName2:
+        if  id and inputFPGA and XdcFileName and inputXdcFile and SrcFileName1 and inputFile1:
             status = 1 
 
         if SrcFileName2:
