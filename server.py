@@ -114,6 +114,7 @@ application = tornado.web.Application([
     (r'/jobs', jobsHandler),
     (r'/about', aboutHandler),
     (r'/status/(\w+)',StatusHandler),
+    (r'/query/(\w+)',QueryHandler),
     (r"/", MainHandler),
     (r'/(.*)', StaticFileHandler, {'path': './page/'}),
 ])
