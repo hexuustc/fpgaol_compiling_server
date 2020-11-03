@@ -9,6 +9,8 @@ from tornado.web import StaticFileHandler
 
 from jobmanager import jobManager
 
+import json
+
 jm = jobManager(4, 16)
 
 logging.basicConfig(
@@ -47,6 +49,7 @@ class StatusHandler(RequestHandler):
 
 class SubmitHandler(RequestHandler):
     def post(self):
+        status = 0
         body_arguments = self.request.body_arguments
         # print(body_arguments.keys())
         id = bytes.decode(body_arguments['inputJobId'][0], encoding='utf-8')
@@ -66,10 +69,44 @@ class SubmitHandler(RequestHandler):
             body_arguments['inputFile2'][0], encoding='utf-8')
         #print(id, XdcFileName, SrcFileName1, SrcFileName2, inputFPGA)
         sourcecode = [[XdcFileName, inputXdcFile], [SrcFileName1, inputFile1]]
+
+        if  id and inputFPGA and inputXdcFile and SrcFileName1 and SrcFileName2:
+            status = 1 
+
         if SrcFileName2:
             sourcecode.append([SrcFileName2, inputFile2])
+
+        self.write({'status':status})
+
         jm.add_a_job(id, sourcecode, inputFPGA)
-        self.redirect('/jobs')
+        # self.redirect('/jobs')
+
+
+class QueryHandler(RequestHandler):
+    def get(self,id):
+        status = 0
+        msg = ''
+        output = dict()
+        running_jobs, pending_jobs, finished_jobs, old_jobids = jm.list_jobs()
+        if id in running_jobs:
+            status = 1
+            msg = 'running'
+        elif id in pending_jobs:
+            status = 2
+            msg = 'pending'
+        elif id in finished_jobs or id in old_jobids:
+            status = 3
+            msg = 'finished'
+        else:
+            msg = 'error'
+            status = 0
+
+        output["msg"] = msg
+        output["status"] = status
+
+        self.write(output)
+
+
 
 
 application = tornado.web.Application([
