@@ -72,6 +72,9 @@ class SubmitHandler(RequestHandler):
 
         if  id and inputFPGA and XdcFileName and inputXdcFile and SrcFileName1 and inputFile1:
             status = 1 
+        else:
+            self.write({'status':status})
+            return 
 
         if SrcFileName2:
             sourcecode.append([SrcFileName2, inputFile2])
