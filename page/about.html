@@ -14,8 +14,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">FPGAOL Compiling Server</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -40,8 +39,39 @@
         <pre>
         简易的fpgaol编译服务器
 
-        提交接口见submit页面
+        /submit
         方法：POST
+        参数：inputJobId 对应工程号（唯一表示，每个工程号必须不同）
+
+​			inputFPGA 对应板子编号 现在只有xc7a100tcsg324-1
+
+​			XdcFileName  Xdc文件的名字 可以随意，例如fpgaol01.xdc
+
+​			inputXdcFile Xdc对应code文件
+
+​			inputFiles 对应具体代码文件（可以多个）
+        返回值：
+
+​		    status 1 代表通过 0 代表没有通过
+
+        /query/(id)
+        方法：GET
+        无参数，对应id应该和之前的工程号对应
+        返回值：
+            msg 对应信息
+
+            status 对应状态码 
+            
+            status = 1 ，信息为running，程序正在运行
+            status = 2 ，信息为pending，程序排队（对应当前服务器数量少于上传程序的情况）
+            status = 3 ，信息为finished，程序完成
+            status = 0 ，信息为error，程序有错
+
+        /results/(id)/(id).bits
+        应该可以直接下载对应的文件
+
+        /results/(id)/vivado.log
+        对应日志，可以输出给用户，也可以下载
 
         job页面可以看到job信息
 
