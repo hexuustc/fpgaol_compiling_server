@@ -67,17 +67,26 @@ class SubmitHandler(RequestHandler):
             body_arguments['SrcFileName2'][0], encoding='utf-8')
         inputFile2 = bytes.decode(
             body_arguments['inputFile2'][0], encoding='utf-8')
-        #print(id, XdcFileName, SrcFileName1, SrcFileName2, inputFPGA)
-        sourcecode = [[XdcFileName, inputXdcFile], [SrcFileName1, inputFile1]]
 
-        if  id and inputFPGA and XdcFileName and inputXdcFile and SrcFileName1 and inputFile1:
+        inputFiles = body_arguments['inputFiles']
+        # SrcFileName = body_arguments['SrcFilname']
+        #print(id, XdcFileName, SrcFileName1, SrcFileName2, inputFPGA)
+        # sourcecode = [[XdcFileName, inputXdcFile], [SrcFileName1, inputFile1]]
+
+        sourcecode = []
+
+        for i,inputFile in enumerate(inputFiles):
+            sourcecode.append([str(i)+'.v',inputFile])
+
+
+        if  id and inputFPGA and XdcFileName and inputXdcFile and inputFiles:
             status = 1 
         else:
             self.write({'status':status})
             return 
 
-        if SrcFileName2:
-            sourcecode.append([SrcFileName2, inputFile2])
+        # if SrcFileName2:
+            # sourcecode.append([SrcFileName2, inputFile2])
 
         self.write({'status':status})
 
@@ -91,6 +100,7 @@ class QueryHandler(RequestHandler):
         msg = ''
         output = dict()
         running_jobs, pending_jobs, finished_jobs, old_jobids = jm.list_jobs()
+
         if id in running_jobs:
             status = 1
             msg = 'running'
