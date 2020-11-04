@@ -59,26 +59,26 @@ class SubmitHandler(RequestHandler):
             body_arguments['XdcFileName'][0], encoding='utf-8')
         inputXdcFile = bytes.decode(
             body_arguments['inputXdcFile'][0], encoding='utf-8')
-        SrcFileName1 = bytes.decode(
-            body_arguments['SrcFileName1'][0], encoding='utf-8')
-        inputFile1 = bytes.decode(
-            body_arguments['inputFile1'][0], encoding='utf-8')
-        SrcFileName2 = bytes.decode(
-            body_arguments['SrcFileName2'][0], encoding='utf-8')
-        inputFile2 = bytes.decode(
-            body_arguments['inputFile2'][0], encoding='utf-8')
+  #      SrcFileName1 = bytes.decode(
+  #          body_arguments['SrcFileName1'][0], encoding='utf-8')
+  #      inputFile1 = bytes.decode(
+  #          body_arguments['inputFile1'][0], encoding='utf-8')
+  #      SrcFileName2 = bytes.decode(
+  #          body_arguments['SrcFileName2'][0], encoding='utf-8')
+  #      inputFile2 = bytes.decode(
+  #          body_arguments['inputFile2'][0], encoding='utf-8')
 
         inputFiles = body_arguments['inputFiles']
         # SrcFileName = body_arguments['SrcFilname']
         #print(id, XdcFileName, SrcFileName1, SrcFileName2, inputFPGA)
         # sourcecode = [[XdcFileName, inputXdcFile], [SrcFileName1, inputFile1]]
 
-        sourcecode = []
+        sourcecode = [[XdcFileName,inputXdcFile]]
 
         for i,inputFile in enumerate(inputFiles):
-            sourcecode.append([str(i)+'.v',inputFile])
+            sourcecode.append([str(i)+'.v',bytes.decode(inputFile,encoding='utf-8')])
 
-
+  #      print(sourcecode)
         if  id and inputFPGA and XdcFileName and inputXdcFile and inputFiles:
             status = 1 
         else:
