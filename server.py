@@ -36,7 +36,20 @@ class jobsHandler(RequestHandler):
 
 class StatusHandler(RequestHandler):
     def get(self,id):
-        running_jobs, pending_jobs, finished_jobs, old_jobids = jm.list_jobs()
+        running_jobs_temp, pending_jobs_temp, finished_jobs_temp, old_jobids = jm.list_jobs()
+        
+        running_jobs = []
+        pending_jobs = []
+        finished_jobs = []
+        for each in running_jobs_temp:
+            running_jobs.append(each[0])
+
+        for each in pending_jobs_temp:
+            pending_jobs.append(each[0])
+
+        for each in finished_jobs_temp:
+            finished_jobs.append(each[0])
+
         if id in running_jobs:
             self.write('running')
         elif id in pending_jobs:
@@ -99,8 +112,21 @@ class QueryHandler(RequestHandler):
         status = 0
         msg = ''
         output = dict()
-        running_jobs, pending_jobs, finished_jobs, old_jobids = jm.list_jobs()
+        running_jobs_temp, pending_jobs_temp, finished_jobs_temp, old_jobids = jm.list_jobs()
 
+        running_jobs = []
+        pending_jobs = []
+        finished_jobs = []
+        for each in running_jobs_temp:
+            running_jobs.append(each[0])
+
+        for each in pending_jobs_temp:
+            pending_jobs.append(each[0])
+
+        for each in finished_jobs_temp:
+            finished_jobs.append(each[0])
+
+        print(jm.list_jobs())
         if id in running_jobs:
             status = 1
             msg = 'running'
