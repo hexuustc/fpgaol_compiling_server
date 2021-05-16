@@ -6,13 +6,13 @@ module top
 );
 	assign LED[0] = sw[0];
 	wire clk1, clk2, clk3;
-	clk_wiz_0 clk_wiz_0_inst
-	(
-		.clk_in1(CLK),
-		.clk_out1(clk1),
-		.clk_out2(clk2),
-		.clk_out3(clk3)
-	);
+//	clk_wiz_0 clk_wiz_0_inst
+//	(
+//		.clk_in1(CLK),
+//		.clk_out1(clk1),
+//		.clk_out2(clk2),
+//		.clk_out3(clk3)
+//	);
 
 	reg [31:0]cnt1 = 0;
 	reg [31:0]cnt2 = 0;

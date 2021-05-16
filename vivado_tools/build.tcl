@@ -11,9 +11,9 @@ cd $proj_path
 create_project -part $device -force v_proj
 set_property target_language Verilog [current_project]
 
-read_ip $ip_dir/clk_wiz_0/clk_wiz_0.xci
-upgrade_ip -quiet [get_ips *]
-generate_target {all} [get_ips *]
+#read_ip $ip_dir/clk_wiz_0/clk_wiz_0.xci
+#upgrade_ip -quiet [get_ips *]
+#generate_target {all} [get_ips *]
 
 read_verilog [glob ./*.v]
 read_xdc [glob ./*.xdc]
