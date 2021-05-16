@@ -72,6 +72,9 @@ class SubmitHandler(RequestHandler):
             body_arguments['XdcFileName'][0], encoding='utf-8')
         inputXdcFile = bytes.decode(
             body_arguments['inputXdcFile'][0], encoding='utf-8')
+        ZipFileName = 'UserZip.zip'
+        inputZipFile = bytes.decode(
+            body_arguments['inputZipFile'][0], encoding='utf-8')
   #      SrcFileName1 = bytes.decode(
   #          body_arguments['SrcFileName1'][0], encoding='utf-8')
   #      inputFile1 = bytes.decode(
@@ -81,18 +84,19 @@ class SubmitHandler(RequestHandler):
   #      inputFile2 = bytes.decode(
   #          body_arguments['inputFile2'][0], encoding='utf-8')
 
-        inputFiles = body_arguments['inputFiles']
+        inputFiles = body_arguments['inputFile1']
         # SrcFileName = body_arguments['SrcFilname']
         #print(id, XdcFileName, SrcFileName1, SrcFileName2, inputFPGA)
         # sourcecode = [[XdcFileName, inputXdcFile], [SrcFileName1, inputFile1]]
 
-        sourcecode = [[XdcFileName,inputXdcFile]]
+        sourcecode = [[ZipFileName, inputZipFile]]
 
-        for i,inputFile in enumerate(inputFiles):
-            sourcecode.append([str(i)+'.v',bytes.decode(inputFile,encoding='utf-8')])
+        # for i,inputFile in enumerate(inputFiles):
+            # sourcecode.append([str(i)+'.v',bytes.decode(inputFile,encoding='utf-8')])
 
   #      print(sourcecode)
-        if  id and inputFPGA and XdcFileName and inputXdcFile and inputFiles:
+        # if  id and inputFPGA and XdcFileName and inputXdcFile and inputFiles:
+        if  id and inputFPGA and inputZipFile:
             status = 1 
         else:
             self.write({'status':status})

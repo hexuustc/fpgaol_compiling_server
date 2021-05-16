@@ -4,6 +4,7 @@ import logging
 import threading
 
 import time
+import base64
 
 from compile import compile
 
@@ -32,8 +33,13 @@ class job:
 
         for filename, code in sourcecode:
             try:
-                f = open(os.path.join(JOBS_DIR, id, filename), 'wt')
-                f.write(code)
+                f = open(os.path.join(JOBS_DIR, id, filename), 'wb')
+                ZipFileName = 'UserZip.zip'
+                if filename == ZipFileName:
+                    b64_content = base64.urlsafe_b64decode(code)
+                    f.write(b64_content)
+                else:
+                    f.write(code)
                 f.close()
                 self.filenames.append(filename)
             except Exception as e:
