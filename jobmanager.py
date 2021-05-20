@@ -7,6 +7,7 @@ import time
 import base64
 
 from compile import compile
+from LogExtract import LogEx
 
 JOBS_DIR = 'jobs'
 
@@ -83,6 +84,8 @@ class jobManager:
 
     def job_finish(self, id):
         logger.info('job finished %s' % id)
+        logger.info("\nCompilingPrjid%sFinish"%id)
+        LogEx(id)
         self.lock.acquire()
         self.running_jobs[id].finish_time = time.strftime(
             "%Y-%m-%d %H:%M:%S", time.localtime())

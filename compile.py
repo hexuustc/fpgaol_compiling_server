@@ -20,31 +20,3 @@ def compile(jobdir, id, filenames, device):
     os.system(vivado_exec + ' -mode ' + vivado_mode + ' -source ' + tcl_build_path + 
             ' -tclargs ' + work_root + ' ' + device + ' ' + ip_dir)
 
-# def compile(jobdir, id, filenames, device):
-    # print(jobdir, id, filenames, device)
-    # # time.sleep(5)
-    # # return
-    # name = id
-    # tool_options = {
-        # 'part': device,
-    # }
-
-    # work_root = os.path.join(jobdir, id)
-
-    # files = []
-    # for filename in filenames:
-        # _, extension = os.path.splitext(filename)
-        # filetype = {'.v': 'verilogSource', '.xdc': 'xdc'}[extension]
-        # files.append({'name': filename, 'file_type': filetype})
-
-    # tool = 'vivado'
-    # edam = {
-        # 'files': files,
-        # 'name': name,
-        # 'tool_options': {'vivado': tool_options},
-    # }
-
-    # backend = get_edatool(tool)(edam=edam, work_root=work_root)
-    # backend.configure()
-    # backend.build()
-
