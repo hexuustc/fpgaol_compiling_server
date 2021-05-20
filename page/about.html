@@ -45,14 +45,10 @@
 
 ​			inputFPGA 对应板子编号 现在只有xc7a100tcsg324-1
 
-​			XdcFileName  Xdc文件的名字 可以随意，例如fpgaol01.xdc
-
-​			inputXdcFile Xdc对应code文件
-
-​			inputFiles 对应具体代码文件（可以多个）
+​			inputZipFile 所有源码一起打包，包括xdc文件，并以base64编码进行传输
         返回值：
 
-​		    status 1 代表通过 0 代表没有通过
+​		    code 1 代表通过 0 代表没有通过
 
         /query/(id)
         方法：GET
@@ -67,11 +63,15 @@
             status = 3 ，信息为finished，程序完成
             status = 0 ，信息为error，程序有错
 
-        /results/(id)/(id).bits
-        应该可以直接下载对应的文件
-
-        /results/(id)/vivado.log
-        对应日志，可以输出给用户，也可以下载
+        /download/(id)
+        方法：GET
+        无参数，对应id应该和之前的工程号对应
+        返回值：
+        code： 1 表示下载成功，0 表示下载失败，表明没有该比特流文件
+        msg: 对应信息
+        data: {
+            file: 若成功则返回下载地址，否则为空
+        }
 
         job页面可以看到job信息
 

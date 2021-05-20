@@ -4,8 +4,10 @@ import logging
 import threading
 
 import time
+import base64
 
 from compile import compile
+from LogExtract import LogEx
 
 JOBS_DIR = 'jobs'
 
@@ -32,8 +34,13 @@ class job:
 
         for filename, code in sourcecode:
             try:
-                f = open(os.path.join(JOBS_DIR, id, filename), 'wt')
-                f.write(code)
+                f = open(os.path.join(JOBS_DIR, id, filename), 'wb')
+                ZipFileName = 'UserZip.zip'
+                if filename == ZipFileName:
+                    b64_content = base64.urlsafe_b64decode(code)
+                    f.write(b64_content)
+                else:
+                    f.write(code)
                 f.close()
                 self.filenames.append(filename)
             except Exception as e:
@@ -77,6 +84,8 @@ class jobManager:
 
     def job_finish(self, id):
         logger.info('job finished %s' % id)
+        logger.info("\nCompilingPrjid%sFinish"%id)
+        LogEx(id)
         self.lock.acquire()
         self.running_jobs[id].finish_time = time.strftime(
             "%Y-%m-%d %H:%M:%S", time.localtime())
