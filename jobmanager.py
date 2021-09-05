@@ -2,6 +2,7 @@ import os
 import queue
 import logging
 import threading
+import shutil
 
 import time
 import base64
@@ -26,6 +27,8 @@ def try_compile(jobdir, id, filenames, device, callback):
 class job:
     def _create(self, id, sourcecode):
         try:
+            if os.path.exists(os.path.join(JOBS_DIR, id)):
+                shutil.rmtree(os.path.join(JOBS_DIR, id))
             os.mkdir(os.path.join(JOBS_DIR, id))
         except FileExistsError:
             logger.warning('dir (%s) exists' % id)

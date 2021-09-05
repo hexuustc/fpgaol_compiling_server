@@ -20,13 +20,22 @@ logger = logging.getLogger(__name__)
 
 class MainHandler(RequestHandler):
     def get(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.render('page/index.html')
 class aboutHandler(RequestHandler):
     def get(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.render('page/about.html')
 
 class jobsHandler(RequestHandler):
     def get(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
         running_jobs, pending_jobs, finished_jobs, old_jobids = jm.list_jobs()
         
@@ -36,6 +45,9 @@ class jobsHandler(RequestHandler):
 
 class StatusHandler(RequestHandler):
     def get(self,id):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         running_jobs_temp, pending_jobs_temp, finished_jobs_temp, old_jobids = jm.list_jobs()
         
         running_jobs = []
@@ -62,6 +74,9 @@ class StatusHandler(RequestHandler):
 
 class SubmitHandler(RequestHandler):
     def post(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         code = 0
         msg = "提交编译失败"
         body_arguments = self.request.body_arguments
@@ -124,6 +139,9 @@ class SubmitHandler(RequestHandler):
 
 class QueryHandler(RequestHandler):
     def get(self,id):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         status = 0
         code = 1
         msg = ''
@@ -169,6 +187,9 @@ class QueryHandler(RequestHandler):
 
 class DownloadHandler(RequestHandler):
     def get(self,id):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         code = 1
         msg = "下载成功"
         path = "./jobs/%s/results/top.bit"%id
