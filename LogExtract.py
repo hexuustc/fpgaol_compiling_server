@@ -18,7 +18,7 @@ def LogEx(id):
     errorpath = path + "error.log"
     copyfile(source,target)
     with open(source,'w') as f:
-        f.truncate()
+        pass
     with open(target,'r') as f:
         with open(result,'w') as fp:
             line = f.readline()

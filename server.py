@@ -90,8 +90,8 @@ class SubmitHandler(RequestHandler):
         #inputXdcFile = bytes.decode(
             #body_arguments['inputXdcFile'][0], encoding='utf-8')
         ZipFileName = 'UserZip.zip'
-        inputZipFile = bytes.decode(
-            body_arguments['inputZipFile'][0], encoding='utf-8')
+        
+        inputZipFile = self.request.files['inputZipFile'][0].get('body')
   #      SrcFileName1 = bytes.decode(
   #          body_arguments['SrcFileName1'][0], encoding='utf-8')
   #      inputFile1 = bytes.decode(
@@ -123,14 +123,14 @@ class SubmitHandler(RequestHandler):
                 msg += ",the inputFPGA is not correct"
             if not inputZipFile:
                 msg += ",the inputZipFile is not correct"
-            data = json.dumps({"code": code,"msg": msg})
+            data = {"code": code,"msg": msg}
             self.write(data)
             logger.info("\nCompilingPrjid%sFinish"%id)
             return 
 
         # if SrcFileName2:
             # sourcecode.append([SrcFileName2, inputFile2])
-        data = json.dumps({"code": code,"msg": msg})
+        data = {"code": code,"msg": msg}
         self.write(data)
 
         jm.add_a_job(id, sourcecode, inputFPGA)
@@ -161,7 +161,7 @@ class QueryHandler(RequestHandler):
             finished_jobs.append(each[0])
         path = "./jobs/%s/results/top.bit"%id
         file_exist = os.path.exists(path)
-        print(jm.list_jobs())
+        #print(jm.list_jobs())
         if id in running_jobs:
             status = 1
             msg = 'running'
@@ -182,8 +182,45 @@ class QueryHandler(RequestHandler):
 
         #output["msg"] = msg
         #output["status"] = status
-        data = json.dumps({"code": code,"msg": msg,"data":{"status": status}})
+        data = {"code": code,"msg": msg,"data":{"status": status}}
         self.write(data)
+
+class JobListHandler(RequestHandler):
+    def get(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        #output = dict()
+        running_jobs_temp, pending_jobs_temp, finished_jobs_temp, old_jobids = jm.list_jobs()
+
+        new_jobs = []
+        data = []
+        for each in running_jobs_temp:
+            data.append([each[0],1,each[1]])
+            new_jobs.append(each[0])
+
+        for each in pending_jobs_temp:
+            data.append([each[0],2,each[1]])
+            new_jobs.append(each[0])
+
+        for each in finished_jobs_temp:
+            path = "./jobs/%s/results/top.bit"%each[0]
+            file_exist = os.path.exists(path)
+            new_jobs.append(each[0])
+            if file_exist:
+                data.append([each[0],3,each[1]])
+            else:
+                data.append([each[0],4,each[1]])
+            
+        for each in old_jobids:
+            if each not in new_jobs:
+                path = "./jobs/%s/results/top.bit"%each
+                file_exist = os.path.exists(path)
+                if file_exist:
+                    data.append([each,3,""])
+                else:
+                    data.append([each,4,""])
+        self.write({'data':data})
 
 class DownloadHandler(RequestHandler):
     def get(self,id):
@@ -196,12 +233,12 @@ class DownloadHandler(RequestHandler):
         file_exist = os.path.exists(path)
         File_list = FilesEx(id)
         if file_exist:
-            data = json.dumps({"code": code,"msg": msg,"data":File_list})
+            data = {"code": code,"msg": msg,"data":File_list}
             self.write(data)
         else:
             code = 0
             msg = "下载失败，没有相应比特流文件"
-            data = json.dumps({"code": code,"msg": msg,"data":File_list})
+            data = {"code": code,"msg": msg,"data":File_list}
             self.write(data)
 
 application = tornado.web.Application([
@@ -211,6 +248,7 @@ application = tornado.web.Application([
     (r'/status/(\w+)',StatusHandler),
     (r'/query/(\w+)',QueryHandler),
     (r'/download/(\w+)',DownloadHandler),
+    (r'/api_joblist', JobListHandler),
     (r"/", MainHandler),
     (r'/(.*)', StaticFileHandler, {'path': './page/'}),
     
