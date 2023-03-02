@@ -16,16 +16,16 @@ logging.basicConfig(
     format='%(asctime)s line:%(lineno)s,  %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def try_compile(jobdir, id, filenames, device, callback):
+def try_compile(jobdir, id, filenames, device, callback, webcode):
     try:
-        compile(jobdir, id, filenames, device)
+        compile(jobdir, id, filenames, device, webcode)
     except Exception as e:
         logger.warning('compile got exception %s'%(str(e)))
     callback(id)
 
 
 class job:
-    def _create(self, id, sourcecode):
+    def _create(self, id, sourcecode, webcode):
         try:
             if os.path.exists(os.path.join(JOBS_DIR, id)):
                 shutil.rmtree(os.path.join(JOBS_DIR, id))
@@ -34,29 +34,30 @@ class job:
             logger.warning('dir (%s) exists' % id)
 
         self.filenames = []
+        if (webcode == False) :
+            for filename, code in sourcecode:
+                try:
+                    f = open(os.path.join(JOBS_DIR, id, filename), 'wb')
+                    ZipFileName = 'UserZip.zip'
+                    if filename == ZipFileName:
+                        #b64_content = base64.urlsafe_b64decode(code)
+                        f.write(code)
+                    else:
+                        f.write(code)
+                    f.close()
+                    self.filenames.append(filename)
+                except Exception as e:
+                    logger.warning(
+                        'writing sourcecode file (%s) error, value:' % filename, e)
 
-        for filename, code in sourcecode:
-            try:
-                f = open(os.path.join(JOBS_DIR, id, filename), 'wb')
-                ZipFileName = 'UserZip.zip'
-                if filename == ZipFileName:
-                    #b64_content = base64.urlsafe_b64decode(code)
-                    f.write(code)
-                else:
-                    f.write(code)
-                f.close()
-                self.filenames.append(filename)
-            except Exception as e:
-                logger.warning(
-                    'writing sourcecode file (%s) error, value:' % filename, e)
-
-    def __init__(self, id, sourcecode, device):
+    def __init__(self, id, sourcecode, device, webcode):
         self.id = id
+        self.webcode = webcode
         self.submit_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         self.start_time = '-'
         self.finish_time = '-'
         self.device = device
-        self._create(id, sourcecode)
+        self._create(id, sourcecode, webcode)
 
 
 class jobManager:
@@ -72,12 +73,12 @@ class jobManager:
 
         self.lock = threading.Lock()
 
-    def add_a_job(self, id, sourcecode, device):
+    def add_a_job(self, id, sourcecode, device, webcode):
         if id in self.using_job_id:
             logger.warning('id(%s) in using' % id)
             return
         self.using_job_id.add(id)
-        a_new_job = job(id, sourcecode, device)
+        a_new_job = job(id, sourcecode, device, webcode)
         self.lock.acquire()
         if len(self.running_jobs) < self.running_job_max:
             self.run_a_job(id, a_new_job)
@@ -107,7 +108,7 @@ class jobManager:
         self.running_jobs[id] = job
         job.start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         threading.Thread(target=try_compile, args=(
-            JOBS_DIR, id, job.filenames, job.device, self.job_finish)).start()
+            JOBS_DIR, id, job.filenames, job.device, self.job_finish, job.webcode)).start()
 
     def list_jobs(self):
         ret1 = []

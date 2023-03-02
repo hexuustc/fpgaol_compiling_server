@@ -133,8 +133,34 @@ class SubmitHandler(RequestHandler):
         data = {"code": code,"msg": msg}
         self.write(data)
 
-        jm.add_a_job(id, sourcecode, inputFPGA)
+        jm.add_a_job(id, sourcecode, inputFPGA, False)
         # self.redirect('/jobs')
+
+
+
+class WebcodeHandler(RequestHandler):
+    def post(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        code = 0
+        msg = "提交编译失败"
+        body_arguments = self.request.body_arguments
+        path = bytes.decode(body_arguments['path'][0], encoding='utf-8')
+        logger.info("\nCompilingPrjid%s"%path)
+        inputFPGA = "xc7a100tcsg324-1"
+        ZipFileName = 'UserZip.zip'
+        inputZipFile = ""
+        sourcecode = [[ZipFileName, inputZipFile]]
+        code = 1 
+        msg = "提交编译成功，请使用查询接口查询编译状态"
+        
+        data = {"code": code,"msg": msg}
+        self.write(data)
+
+        jm.add_a_job(path, sourcecode, inputFPGA, True)
+        # self.redirect('/jobs')
+
 
 
 class QueryHandler(RequestHandler):
@@ -249,6 +275,7 @@ application = tornado.web.Application([
     (r'/query/(\w+)',QueryHandler),
     (r'/download/(\w+)',DownloadHandler),
     (r'/api_joblist', JobListHandler),
+    (r'/webcode', WebcodeHandler),
     (r"/", MainHandler),
     (r'/(.*)', StaticFileHandler, {'path': './page/'}),
     
