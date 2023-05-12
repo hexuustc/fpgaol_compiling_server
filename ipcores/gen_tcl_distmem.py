@@ -1,5 +1,3 @@
-import json
-
 ipcore_param = {
     # ip 核的种类
     '_meta_type': 'dist_mem_gen',
