@@ -2,8 +2,8 @@ import os
 # from edalize import get_edatool
 import time
 
-#vivado_exec = '/opt/Xilinx/Vivado/2020.2/bin/vivado'
-vivado_exec = '/tools/Xilinx/Vivado/2019.2/bin/vivado'
+vivado_exec = '/opt/Xilinx/Vivado/2020.2/bin/vivado'
+#vivado_exec = '/tools/Xilinx/Vivado/2019.2/bin/vivado'
 vivado_tools_dir = 'vivado_tools'
 vivado_ip_dir = 'vivado_tools/ip'
 tcl_build = 'build.tcl'
