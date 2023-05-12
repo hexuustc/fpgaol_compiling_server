@@ -137,6 +137,39 @@ class SubmitHandler(RequestHandler):
         # self.redirect('/jobs')
 
 
+class SubmitJSONHandler(RequestHandler):
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
+    def post(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        code = 0
+        msg = "提交编译失败"
+
+        # 策略：直接接收一个 JSON string
+        body_dict = tornado.escape.json_decode(self.request.body)
+        print(body_dict)
+
+        jm.add_a_job(0, body_dict, 'dummy', webcode=False, jsoncode=True)
+
+        code = 1
+        msg = "提交编译成功，请使用查询接口查询编译状态"
+        data = {"code": code,"msg": msg}
+        self.write(data)
+
+    def options(self, *args):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        # no body
+        # `*args` is for route with `path arguments` supports
+        self.set_status(204)
+        self.finish()
+
 
 class WebcodeHandler(RequestHandler):
     def post(self):
@@ -269,6 +302,7 @@ class DownloadHandler(RequestHandler):
 
 application = tornado.web.Application([
     (r'/submit', SubmitHandler),
+    (r'/submit_proj_json', SubmitJSONHandler),
     (r'/jobs', jobsHandler),
     (r'/about', aboutHandler),
     (r'/status/(\w+)',StatusHandler),

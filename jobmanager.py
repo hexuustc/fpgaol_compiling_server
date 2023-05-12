@@ -16,16 +16,42 @@ logging.basicConfig(
     format='%(asctime)s line:%(lineno)s,  %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def try_compile(jobdir, id, filenames, device, callback, webcode):
+def try_compile(jobdir, id, filenames, device, callback, webcode, jsoncode=False, ip_conf=None):
+    builder_path = None
+
+    if ip_conf is None:
+        ip_conf = []
+    else:
+        # generate custom build script to init ip core
+        import sys
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+        from ipcores.gen_tcl_clkwiz import gen_tcl_clkwiz
+        from ipcores.gen_tcl_distmem import gen_tcl_distmem
+
+        builder_path = os.path.join(jobdir, id, "custom_build.tcl")
+        with open(builder_path, "w") as f:
+            with open('vivado_tools/preamble.tcl', "r") as fin:
+                print(fin.read(), file=f)
+            for ip in ip_conf:
+                if ip['_meta_type'] == 'clk_wiz':
+                    print(gen_tcl_clkwiz(ip), file=f)
+                elif ip['_meta_type'] == 'dist_mem_gen':
+                    print(gen_tcl_distmem(ip), file=f)
+            print("""
+generate_target all [get_ips]
+synth_ip [get_ips]""", file=f)
+            with open('vivado_tools/epilog.tcl', "r") as fin:
+                print(fin.read(), file=f)
+
     try:
-        compile(jobdir, id, filenames, device, webcode)
+        compile(jobdir, id, filenames, device, webcode, jsoncode, builder_path)
     except Exception as e:
         logger.warning('compile got exception %s'%(str(e)))
     callback(id)
 
 
 class job:
-    def _create(self, id, sourcecode, webcode):
+    def _create(self, id, sourcecode, webcode, jsoncode=False):
         try:
             if os.path.exists(os.path.join(JOBS_DIR, id)):
                 shutil.rmtree(os.path.join(JOBS_DIR, id))
@@ -34,7 +60,37 @@ class job:
             logger.warning('dir (%s) exists' % id)
 
         self.filenames = []
-        if (webcode == False) :
+        self.ip_configs = []
+        if jsoncode:
+            # sourcecode should be a python dict extracted from the json file
+            for section in sourcecode:
+                # if sourcecode[section]['type']
+                print("processing section type =", section['type'])
+                if section['type'] == 'xdc':
+                    filename = section['label']
+                    f = open(os.path.join(JOBS_DIR, id, filename), 'w')
+                    f.write(section['text'])
+                    f.close()
+                    self.filenames.append(filename)
+                elif section['type'] == 'ip_root':
+                    for core in section['children']:
+                        if core['type'] != 'ipcore':
+                            print("warning: ignoring non-ipcore {}".format(core['label']))
+                            continue
+                        core['params']['_meta_name'] = core['label']
+                        self.ip_configs.append(core['params'])
+                    # print(self.ip_configs)
+                elif section['type'] == 'src_root':
+                    for files in section['children']:
+                        if files['type'] != 'file':
+                            print("warning: ignoring non-file {}".format(files['label']))
+                            continue
+                        filename = files['label']
+                        f = open(os.path.join(JOBS_DIR, id, filename), 'w')
+                        f.write(files['text'])
+                        f.close()
+                        self.filenames.append(filename)
+        elif (webcode == False) :
             for filename, code in sourcecode:
                 try:
                     f = open(os.path.join(JOBS_DIR, id, filename), 'wb')
@@ -50,14 +106,15 @@ class job:
                     logger.warning(
                         'writing sourcecode file (%s) error, value:' % filename, e)
 
-    def __init__(self, id, sourcecode, device, webcode):
+    def __init__(self, id, sourcecode, device, webcode, jsoncode=False):
         self.id = id
         self.webcode = webcode
+        self.jsoncode = jsoncode
         self.submit_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         self.start_time = '-'
         self.finish_time = '-'
         self.device = device
-        self._create(id, sourcecode, webcode)
+        self._create(id, sourcecode, webcode, jsoncode)
 
 
 class jobManager:
@@ -73,12 +130,24 @@ class jobManager:
 
         self.lock = threading.Lock()
 
-    def add_a_job(self, id, sourcecode, device, webcode):
+    def add_a_job(self, id, sourcecode, device, webcode, jsoncode=False):
+        if jsoncode:
+            device = 'xc7a100tcsg324-1'
+            import random
+            import string
+            def get_new_id():
+                return ''.join(random.choice(
+                    string.ascii_uppercase + string.digits) for _ in range(8))
+            id = get_new_id()
+            while id in self.using_job_id:
+                id = get_new_id()
+            logger.info("\nCompilingPrjid%s"%id)
         if id in self.using_job_id:
             logger.warning('id(%s) in using' % id)
             return
         self.using_job_id.add(id)
-        a_new_job = job(id, sourcecode, device, webcode)
+
+        a_new_job = job(id, sourcecode, device, webcode, jsoncode)
         self.lock.acquire()
         if len(self.running_jobs) < self.running_job_max:
             self.run_a_job(id, a_new_job)
@@ -108,7 +177,7 @@ class jobManager:
         self.running_jobs[id] = job
         job.start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         threading.Thread(target=try_compile, args=(
-            JOBS_DIR, id, job.filenames, job.device, self.job_finish, job.webcode)).start()
+            JOBS_DIR, id, job.filenames, job.device, self.job_finish, job.webcode, job.jsoncode, job.ip_configs)).start()
 
     def list_jobs(self):
         ret1 = []
